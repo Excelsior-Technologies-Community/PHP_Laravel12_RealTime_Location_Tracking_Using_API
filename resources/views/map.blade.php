@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Realtime Location Tracking</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAG51y1x54XuveIKH4OEcns_v2ZvVJqJfY"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAP_KEY"></script>
 </head>
 <body>
 
