@@ -9,7 +9,11 @@ class Location extends Model
     protected $fillable = [
         'user_name',
         'latitude',
-        'longitude'
+        'longitude',
+        'tracked_at',
+    ];
+
+    protected $casts = [
+        'tracked_at' => 'datetime',
     ];
 }
-

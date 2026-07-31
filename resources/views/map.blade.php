@@ -1,72 +1,142 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Realtime Location Tracking</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAG51y1x54XuveIKH4OEcns_v2ZvVJqJfY"></script>
 </head>
+
 <body>
 
-<h2>Realtime Location Tracking</h2>
-<div id="map" style="height:500px;width:100%;"></div>
+    <h2>Realtime Location Tracking</h2>
 
-<script>
-let map, marker;
+    <p id="status">
+        Waiting for location...
+    </p>
 
-function initMap(lat = 23.0225, lng = 72.5714) {
-    let myLatLng = { lat: lat, lng: lng };
+    <div id="map" style="height:500px;width:100%;"></div>
 
-    map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 15,
-        center: myLatLng,
-    });
+    <script>
+        let map, marker;
 
-    marker = new google.maps.Marker({
-        position: myLatLng,
-        map: map,
-    });
-}
+        function initMap(lat = 23.0225, lng = 72.5714) {
+            let myLatLng = {
+                lat: lat,
+                lng: lng
+            };
 
-// Get Browser Location
-function sendLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-
-            let lat = position.coords.latitude;
-            let lng = position.coords.longitude;
-
-            fetch('/api/save-location', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    user_name: 'Mihir',
-                    latitude: lat,
-                    longitude: lng
-                })
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: myLatLng,
             });
 
-        });
-    }
-}
+            marker = new google.maps.Marker({
 
-// Fetch Latest Location
-function fetchLocation() {
-    fetch('/api/latest-location')
-    .then(res => res.json())
-    .then(data => {
-        if(data) {
-            let pos = { lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) };
-            marker.setPosition(pos);
-            map.setCenter(pos);
+                position: myLatLng,
+
+                map: map,
+
+                title: "Current User Location",
+
+                animation: google.maps.Animation.DROP
+
+            });
         }
-    });
-}
 
-initMap();
-setInterval(sendLocation, 5000);   // send every 5 sec
-setInterval(fetchLocation, 5000);  // fetch every 5 sec
-</script>
+        // Get Browser Location
+        function sendLocation() {
+
+            if (!navigator.geolocation) {
+                document.getElementById("status").innerHTML =
+                    "❌ Geolocation is not supported.";
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(function(position) {
+
+                let lat = position.coords.latitude;
+                let lng = position.coords.longitude;
+
+                document.getElementById("status").innerHTML =
+                    "📍 Sending location...";
+
+                fetch('/api/save-location', {
+
+                        method: 'POST',
+
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+
+                        body: JSON.stringify({
+
+                            user_name: 'Mihir',
+                            latitude: lat,
+                            longitude: lng
+
+                        })
+
+                    })
+
+                    .then(res => res.json())
+
+                    .then(data => {
+
+                        document.getElementById("status").innerHTML =
+                            "✅ Location Updated";
+
+                    })
+
+                    .catch(() => {
+
+                        document.getElementById("status").innerHTML =
+                            "❌ Failed to send location.";
+
+                    });
+
+            });
+
+        }
+
+        // Fetch Latest Location
+        function fetchLocation() {
+
+            fetch('/api/latest-location')
+
+                .then(res => res.json())
+
+                .then(data => {
+
+                    if (!data || !data.latitude) {
+                        return;
+                    }
+
+                    let pos = {
+
+                        lat: parseFloat(data.latitude),
+                        lng: parseFloat(data.longitude)
+
+                    };
+
+                    marker.setPosition(pos);
+
+                    map.setCenter(pos);
+
+                })
+
+                .catch(error => {
+
+                    console.log(error);
+
+                });
+
+        }
+
+        initMap();
+        setInterval(sendLocation, 15000);
+        setInterval(fetchLocation, 15000);
+    </script>
 
 </body>
+
 </html>
