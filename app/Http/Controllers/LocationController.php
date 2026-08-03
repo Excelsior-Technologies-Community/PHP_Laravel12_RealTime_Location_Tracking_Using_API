@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Location;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LocationController extends Controller
 {
@@ -53,27 +54,26 @@ class LocationController extends Controller
     }
 
     /**
-     * Location History API
+     * Location History
      */
     public function history()
     {
-        $locations = Location::latest()
-            ->paginate(10);
+        $locations = Location::oldest()->get();
 
         return response()->json([
             'success' => true,
-            'count' => $locations->total(),
+            'count' => $locations->count(),
             'data' => $locations,
         ]);
     }
 
     /**
-     * User Location History API
+     * User History
      */
     public function userHistory($user_name)
     {
         $locations = Location::where('user_name', $user_name)
-            ->latest()
+            ->oldest()
             ->get();
 
         return response()->json([
@@ -85,7 +85,7 @@ class LocationController extends Controller
     }
 
     /**
-     * Location Statistics API
+     * Statistics
      */
     public function statistics()
     {
@@ -104,7 +104,7 @@ class LocationController extends Controller
     }
 
     /**
-     * Delete All Location History
+     * Clear History
      */
     public function clearHistory()
     {
@@ -117,7 +117,7 @@ class LocationController extends Controller
     }
 
     /**
-     * Nearby Locations API
+     * Nearby Locations
      */
     public function nearby(Request $request)
     {
@@ -129,8 +129,6 @@ class LocationController extends Controller
 
         $latitude = $request->latitude;
         $longitude = $request->longitude;
-
-        // Radius in KM (default 5 KM)
         $radius = $request->radius ?? 5;
 
         $locations = Location::selectRaw("
@@ -157,12 +155,118 @@ class LocationController extends Controller
             'success' => true,
             'radius_km' => $radius,
             'total_locations' => $locations->count(),
-            'data' => $locations
+            'data' => $locations,
         ]);
     }
 
     /**
-     * View
+     * Search by User Name
+     */
+    public function search(Request $request)
+    {
+        $request->validate([
+            'user_name' => 'required|string',
+        ]);
+
+        $locations = Location::where('user_name', 'LIKE', '%' . $request->user_name . '%')
+            ->oldest()
+            ->paginate(10);
+
+        return response()->json([
+            'success' => true,
+            'search' => $request->user_name,
+            'count' => $locations->total(),
+            'data' => $locations,
+        ]);
+    }
+
+    /**
+     * Filter by Date
+     */
+    public function filter(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+        ]);
+
+        $locations = Location::whereDate('tracked_at', $request->date)
+            ->oldest()
+            ->paginate(10);
+
+        return response()->json([
+            'success' => true,
+            'date' => $request->date,
+            'count' => $locations->total(),
+            'data' => $locations,
+        ]);
+    }
+
+    /**
+     * Delete Single Location
+     */
+    public function destroy($id)
+    {
+        $location = Location::find($id);
+
+        if (!$location) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Location not found.',
+            ], 404);
+        }
+
+        $location->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Location deleted successfully.',
+        ]);
+    }
+
+    /**
+     * Export CSV
+     */
+    public function exportCsv()
+    {
+        $fileName = 'locations.csv';
+
+        $locations = Location::latest()->get();
+
+        $headers = [
+            "Content-Type" => "text/csv",
+            "Content-Disposition" => "attachment; filename={$fileName}",
+        ];
+
+        $callback = function () use ($locations) {
+
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, [
+                'ID',
+                'User Name',
+                'Latitude',
+                'Longitude',
+                'Tracked At',
+            ]);
+
+            foreach ($locations as $location) {
+                fputcsv($file, [
+                    $location->id,
+                    $location->user_name,
+                    $location->latitude,
+                    $location->longitude,
+                    $location->tracked_at,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return new StreamedResponse($callback, 200, $headers);
+    }
+
+    /**
+     * Dashboard View
      */
     public function index()
     {

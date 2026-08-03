@@ -1,141 +1,853 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+<<<<<<< HEAD
     <title>Realtime Location Tracking</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAP_KEY"></script>
+=======
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+
+    <title>Laravel 12 Real-Time Location Tracking</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAP_KEY"></script>
+
+    <style>
+        body {
+            background: #f5f7fb;
+        }
+
+        .navbar {
+            background: #0d6efd;
+        }
+
+        .navbar-brand {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .navbar-brand:hover {
+            color: #fff;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, .1);
+        }
+
+        .card-title {
+            font-size: 15px;
+            color: #666;
+        }
+
+        .card-text {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        #map {
+            width: 100%;
+            height: 500px;
+            border-radius: 12px;
+        }
+
+        .table-responsive {
+            max-height: 450px;
+            overflow: auto;
+        }
+
+        .status-box {
+            padding: 12px;
+            border-radius: 10px;
+            background: #e9ecef;
+            font-weight: bold;
+        }
+    </style>
+
+>>>>>>> development
 </head>
 
 <body>
 
-    <h2>Realtime Location Tracking</h2>
+    <nav class="navbar navbar-expand-lg">
 
-    <p id="status">
-        Waiting for location...
-    </p>
+        <div class="container">
 
-    <div id="map" style="height:500px;width:100%;"></div>
+            <a class="navbar-brand" href="#">
 
-    <script>
-        let map, marker;
+                📍 Laravel 12 Real-Time Location Tracking
 
-        function initMap(lat = 23.0225, lng = 72.5714) {
-            let myLatLng = {
-                lat: lat,
-                lng: lng
-            };
+            </a>
 
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 15,
-                center: myLatLng,
-            });
+        </div>
 
-            marker = new google.maps.Marker({
+    </nav>
 
-                position: myLatLng,
+    <div class="container mt-4">
 
-                map: map,
+        <div class="row">
 
-                title: "Current User Location",
+            <div class="col-md-3">
 
-                animation: google.maps.Animation.DROP
+                <div class="card text-center">
 
-            });
-        }
+                    <div class="card-body">
 
-        // Get Browser Location
-        function sendLocation() {
+                        <h6 class="card-title">
 
-            if (!navigator.geolocation) {
-                document.getElementById("status").innerHTML =
-                    "❌ Geolocation is not supported.";
-                return;
+                            Total Locations
+
+                        </h6>
+
+                        <h2 class="card-text text-primary"
+
+                            id="totalLocations">
+
+                            0
+
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <div class="card text-center">
+
+                    <div class="card-body">
+
+                        <h6 class="card-title">
+
+                            Total Users
+
+                        </h6>
+
+                        <h2 class="card-text text-success"
+
+                            id="totalUsers">
+
+                            0
+
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <div class="card text-center">
+
+                    <div class="card-body">
+
+                        <h6 class="card-title">
+
+                            Latest User
+
+                        </h6>
+
+                        <h5 id="latestUser">
+
+                            --
+
+                        </h5>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3">
+
+                <div class="card text-center">
+
+                    <div class="card-body">
+
+                        <h6 class="card-title">
+
+                            Last Updated
+
+                        </h6>
+
+                        <h6 id="lastUpdated">
+
+                            --
+
+                        </h6>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <hr>
+
+        <div class="row mb-3">
+
+            <div class="col-md-3">
+
+                <input
+
+                    type="text"
+
+                    id="searchUser"
+
+                    class="form-control"
+
+                    placeholder="Search User">
+
+            </div>
+
+            <div class="col-md-3">
+
+                <input
+
+                    type="date"
+
+                    id="filterDate"
+
+                    class="form-control">
+
+            </div>
+
+            <div class="col-md-6 text-end">
+
+                <button
+
+                    class="btn btn-primary"
+
+                    id="btnSearch">
+
+                    Search
+
+                </button>
+
+                <button
+
+                    class="btn btn-success"
+
+                    onclick="window.open('/api/export-csv')">
+
+                    Export CSV
+
+                </button>
+
+                <button
+
+                    class="btn btn-danger"
+
+                    id="btnClear">
+
+                    Clear History
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-md-12">
+
+                <div
+
+                    class="status-box"
+
+                    id="status">
+
+                    Waiting for location...
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="row mt-4">
+
+            <div class="col-lg-8">
+
+                <div class="card">
+
+                    <div class="card-header bg-primary text-white">
+
+                        Google Map
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div id="map"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="card">
+
+                    <div class="card-header bg-success text-white">
+
+                        Latest Information
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <table class="table">
+
+                            <tr>
+
+                                <th>User</th>
+
+                                <td id="infoUser">--</td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>Latitude</th>
+
+                                <td id="infoLat">--</td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>Longitude</th>
+
+                                <td id="infoLng">--</td>
+
+                            </tr>
+
+                            <tr>
+
+                                <th>Tracked At</th>
+
+                                <td id="infoTime">--</td>
+
+                            </tr>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="row mt-4">
+
+            <div class="col-md-12">
+
+                <div class="card">
+
+                    <div class="card-header bg-dark text-white">
+
+                        Location History
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+
+                            <table
+
+                                class="table table-bordered table-striped">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>ID</th>
+
+                                        <th>User</th>
+
+                                        <th>Latitude</th>
+
+                                        <th>Longitude</th>
+
+                                        <th>Tracked At</th>
+
+                                        <th>Action</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="historyTable">
+
+                                    <tr>
+
+                                        <td colspan="6"
+
+                                            class="text-center">
+
+                                            Loading...
+
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        <script>
+            let map;
+            let marker;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Initialize Google Map
+            |--------------------------------------------------------------------------
+            */
+
+            function initMap(lat = 23.0225, lng = 72.5714) {
+                const position = {
+                    lat: lat,
+                    lng: lng
+                };
+
+                map = new google.maps.Map(document.getElementById("map"), {
+
+                    zoom: 15,
+
+                    center: position,
+
+                    mapTypeId: "roadmap"
+
+                });
+
+                marker = new google.maps.Marker({
+
+                    position: position,
+
+                    map: map,
+
+                    title: "Current User Location",
+
+                    animation: google.maps.Animation.DROP
+
+                });
+
             }
 
-            navigator.geolocation.getCurrentPosition(function(position) {
+            /*
+            |--------------------------------------------------------------------------
+            | Send Browser Location
+            |--------------------------------------------------------------------------
+            */
 
-                let lat = position.coords.latitude;
-                let lng = position.coords.longitude;
+            function sendLocation() {
 
-                document.getElementById("status").innerHTML =
-                    "📍 Sending location...";
+                if (!navigator.geolocation) {
 
-                fetch('/api/save-location', {
+                    document.getElementById("status").innerHTML =
+                        "❌ Geolocation is not supported.";
 
-                        method: 'POST',
+                    return;
 
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                }
 
-                        body: JSON.stringify({
+                navigator.geolocation.getCurrentPosition(function(position) {
 
-                            user_name: 'Mihir',
-                            latitude: lat,
-                            longitude: lng
+                    let latitude = position.coords.latitude;
+
+                    let longitude = position.coords.longitude;
+
+                    document.getElementById("status").innerHTML =
+                        "📡 Sending current location...";
+
+                    fetch('/api/save-location', {
+
+                            method: 'POST',
+
+                            headers: {
+
+                                'Content-Type': 'application/json',
+
+                                'Accept': 'application/json'
+
+                            },
+
+                            body: JSON.stringify({
+
+                                user_name: 'Mihir',
+
+                                latitude: latitude,
+
+                                longitude: longitude
+
+                            })
 
                         })
 
+                        .then(response => response.json())
+
+                        .then(result => {
+
+                            if (result.success) {
+
+                                document.getElementById("status").innerHTML =
+                                    "✅ Location updated successfully.";
+
+                            } else {
+
+                                document.getElementById("status").innerHTML =
+                                    "❌ Failed to save location.";
+
+                            }
+
+                        })
+
+                        .catch(error => {
+
+                            console.log(error);
+
+                            document.getElementById("status").innerHTML =
+                                "❌ Error while sending location.";
+
+                        });
+
+                });
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Fetch Latest Location
+            |--------------------------------------------------------------------------
+            */
+
+            function loadLatestLocation() {
+
+                fetch('/api/latest-location')
+
+                    .then(response => response.json())
+
+                    .then(result => {
+
+                        if (!result.success) {
+                            return;
+                        }
+
+                        let location = result.data;
+
+                        let lat = parseFloat(location.latitude);
+
+                        let lng = parseFloat(location.longitude);
+
+                        let point = {
+
+                            lat: lat,
+
+                            lng: lng
+
+                        };
+
+                        marker.setPosition(point);
+
+                        map.setCenter(point);
+
+                        document.getElementById("infoUser").innerHTML =
+                            location.user_name;
+
+                        document.getElementById("infoLat").innerHTML =
+                            location.latitude;
+
+                        document.getElementById("infoLng").innerHTML =
+                            location.longitude;
+
+                        document.getElementById("infoTime").innerHTML =
+                            location.tracked_at;
+
                     })
 
-                    .then(res => res.json())
+                    .catch(error => {
 
-                    .then(data => {
+                        console.log(error);
 
-                        document.getElementById("status").innerHTML =
-                            "✅ Location Updated";
+                    });
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Load Dashboard Statistics
+            |--------------------------------------------------------------------------
+            */
+
+            function loadStatistics() {
+
+                fetch('/api/location-stats')
+
+                    .then(response => response.json())
+
+                    .then(result => {
+
+                        if (!result.success) {
+                            return;
+                        }
+
+                        let stats = result.statistics;
+
+                        document.getElementById("totalLocations").innerHTML =
+                            stats.total_locations;
+
+                        document.getElementById("totalUsers").innerHTML =
+                            stats.total_users;
+
+                        document.getElementById("latestUser").innerHTML =
+                            stats.latest_user ?? "--";
+
+                        document.getElementById("lastUpdated").innerHTML =
+                            stats.last_updated ?? "--";
 
                     })
 
-                    .catch(() => {
+                    .catch(error => {
 
-                        document.getElementById("status").innerHTML =
-                            "❌ Failed to send location.";
+                        console.log(error);
+
+                    });
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Initial Load
+            |--------------------------------------------------------------------------
+            */
+
+            initMap();
+
+            sendLocation();
+
+            loadLatestLocation();
+
+            loadStatistics();
+        </script>
+
+        <script>
+            /*
+|--------------------------------------------------------------------------
+| Load Location History
+|--------------------------------------------------------------------------
+*/
+
+            function loadHistory(url = '/api/location-history') {
+                fetch(url)
+
+                    .then(response => response.json())
+
+                    .then(result => {
+
+                        if (!result.success) {
+                            return;
+                        }
+
+                        let rows = "";
+
+                        result.data.data.forEach(function(location) {
+
+                            rows += `
+                <tr>
+
+                    <td>${location.id}</td>
+
+                    <td>${location.user_name}</td>
+
+                    <td>${location.latitude}</td>
+
+                    <td>${location.longitude}</td>
+
+                    <td>${location.tracked_at}</td>
+
+                    <td>
+
+                        <button
+                            class="btn btn-danger btn-sm"
+                            onclick="deleteLocation(${location.id})">
+
+                            Delete
+
+                        </button>
+
+                    </td>
+
+                </tr>
+            `;
+
+                        });
+
+                        document.getElementById("historyTable").innerHTML = rows;
+
+                    })
+
+                    .catch(error => console.log(error));
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Search User
+            |--------------------------------------------------------------------------
+            */
+
+            document.getElementById("btnSearch").addEventListener("click", function() {
+
+                let user = document.getElementById("searchUser").value;
+
+                if (user == "") {
+                    loadHistory();
+                    return;
+                }
+
+                loadHistory('/api/search-location?user_name=' + encodeURIComponent(user));
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Filter By Date
+            |--------------------------------------------------------------------------
+            */
+
+            document.getElementById("filterDate").addEventListener("change", function() {
+
+                let date = this.value;
+
+                if (date == "") {
+                    loadHistory();
+                    return;
+                }
+
+                loadHistory('/api/filter-date?date=' + date);
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Delete Location
+            |--------------------------------------------------------------------------
+            */
+
+            function deleteLocation(id) {
+
+                if (!confirm("Delete this location?")) {
+                    return;
+                }
+
+                fetch('/api/location/' + id, {
+
+                        method: "DELETE"
+
+                    })
+
+                    .then(response => response.json())
+
+                    .then(result => {
+
+                        alert(result.message);
+
+                        loadHistory();
+
+                        loadStatistics();
+
+                    });
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Clear History
+            |--------------------------------------------------------------------------
+            */
+
+            document.getElementById("btnClear").addEventListener("click", function() {
+
+                if (!confirm("Delete all location history?")) {
+                    return;
+                }
+
+                fetch('/api/locations/clear', {
+
+                        method: "DELETE"
+
+                    })
+
+                    .then(response => response.json())
+
+                    .then(result => {
+
+                        alert(result.message);
+
+                        loadHistory();
+
+                        loadStatistics();
 
                     });
 
             });
 
-        }
 
-        // Fetch Latest Location
-        function fetchLocation() {
+            /*
+            |--------------------------------------------------------------------------
+            | Auto Refresh
+            |--------------------------------------------------------------------------
+            */
 
-            fetch('/api/latest-location')
+            loadHistory();
 
-                .then(res => res.json())
+            setInterval(function() {
 
-                .then(data => {
+                sendLocation();
 
-                    if (!data || !data.latitude) {
-                        return;
-                    }
+                loadLatestLocation();
 
-                    let pos = {
+                loadStatistics();
 
-                        lat: parseFloat(data.latitude),
-                        lng: parseFloat(data.longitude)
+                loadHistory();
 
-                    };
-
-                    marker.setPosition(pos);
-
-                    map.setCenter(pos);
-
-                })
-
-                .catch(error => {
-
-                    console.log(error);
-
-                });
-
-        }
-
-        initMap();
-        setInterval(sendLocation, 15000);
-        setInterval(fetchLocation, 15000);
-    </script>
+            }, 15000);
+        </script>
 
 </body>
 
